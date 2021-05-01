@@ -242,8 +242,8 @@ CREDITS
 #include <stdio.h>      // need FILE
 #include <string.h>     // stb_define_hash needs memcpy/memset
 #include <time.h>       // stb_dirtree
-#ifdef __MINGW32__
-   #include <fcntl.h>   // O_RDWR
+#if defined(__MINGW32__) || defined(__TINYC__) 
+   #include <fcntl.h>   // O_RDWR NOTE CHANGED SUSHIL
 #endif
 
 #ifdef STB_PERSONAL
@@ -1537,7 +1537,7 @@ int stb_is_pow2(size_t n)
 
 // tricky use of 4-bit table to identify 5 bit positions (note the '-1')
 // 3-bit table would require another tree level; 5-bit table wouldn't save one
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__) && !defined(__TINYC__)
 #pragma warning(push)
 #pragma warning(disable: 4035)  // disable warning about no return value
 int stb_log2_floor(size_t n)
@@ -5602,8 +5602,8 @@ static FILE *stb__open_temp_file(char *temp_name, char *src_name, const char *mo
    }
    #else
    {
-      stb_p_strcpy_s(temp_name+p, 65536, "stmpXXXXXX");
-      #ifdef __MINGW32__
+      stb_p_strcpy_s(temp_name+p, 65536, "stmpXXXXXX"); // NOTE CHANGED SUSHIL
+      #if defined(__MINGW32__) || defined(__TINYC__) 
          stb_p_mktemp(temp_name);
          int fd = open(temp_name, O_RDWR);
       #else

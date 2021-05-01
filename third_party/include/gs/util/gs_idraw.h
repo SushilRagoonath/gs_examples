@@ -338,9 +338,7 @@ gs_immediate_draw_t gs_immediate_draw_new()
 	// Create shader
 	gs_graphics_shader_source_desc_t vsrc; vsrc.type = GS_GRAPHICS_SHADER_STAGE_VERTEX; vsrc.source = gsi_v_fillsrc;
 	gs_graphics_shader_source_desc_t fsrc; fsrc.type = GS_GRAPHICS_SHADER_STAGE_FRAGMENT; fsrc.source = gsi_f_fillsrc;
-	gs_graphics_shader_source_desc_t gsi_sources[] = {
-		vsrc, fsrc
-	};
+	gs_graphics_shader_source_desc_t gsi_sources[2] = {vsrc, fsrc};
 
 	gs_graphics_shader_desc_t sdesc = gs_default_val();
 	sdesc.sources = gsi_sources;

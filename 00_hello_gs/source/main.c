@@ -8,7 +8,8 @@
 
     Press `esc` to exit the application.
 =================================================================*/
-
+#define _wfindfirst32i64  _wfindfirsti64
+#define _wfindnext32i64  _wfindnexti64
 #define GS_IMPL
 #include <gs/gs.h>
 
