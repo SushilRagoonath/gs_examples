@@ -1,0 +1,1 @@
+cl source\main.c -I ..\third_party\include -I external opengl32.lib shell32.lib gdi32.lib user32.lib Advapi32.lib
