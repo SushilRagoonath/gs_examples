@@ -1203,7 +1203,7 @@ void __glfw_key_callback(GLFWwindow* window, s32 code, s32 scancode, s32 action,
     evt.type = GS_PLATFORM_EVENT_KEY;
     evt.key.codepoint = code;
     evt.key.keycode = key;
-
+    evt.key.modifier = mods;
     switch (action)
     {
         // Released
@@ -1212,8 +1212,9 @@ void __glfw_key_callback(GLFWwindow* window, s32 code, s32 scancode, s32 action,
             evt.key.action = GS_PLATFORM_KEY_RELEASED;
         } break;
 
-        // Pressed
+            // Pressed
         case 1: {
+//            gs_printf("mod %i codepoint %i\n",mods,code);
             gs_platform_press_key(key);
             evt.key.action = GS_PLATFORM_KEY_PRESSED;
         } break;

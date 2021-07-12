@@ -523,9 +523,10 @@ void mu_draw_icon(mu_Context *ctx, int id, mu_Rect rect, mu_Color color) {
 /*============================================================================
 ** layout
 **============================================================================*/
-#define RELATIVE 1
-#define ABSOLUTE 2
-//enum { RELATIVE = 1, ABSOLUTE = 2 };
+enum {
+    MU_RELATIVE = 1,
+    MU_ABSOLUTE = 2
+     };
 
 
 void mu_layout_begin_column(mu_Context *ctx) {
@@ -572,7 +573,7 @@ void mu_layout_height(mu_Context *ctx, int height) {
 void mu_layout_set_next(mu_Context *ctx, mu_Rect r, int relative) {
   mu_Layout *layout = get_layout(ctx);
   layout->next = r;
-  layout->next_type = relative ? RELATIVE : ABSOLUTE;
+  layout->next_type = relative ? MU_RELATIVE : MU_ABSOLUTE;
 }
 
 
@@ -586,7 +587,7 @@ mu_Rect mu_layout_next(mu_Context *ctx) {
     int type = layout->next_type;
     layout->next_type = 0;
     res = layout->next;
-    if (type == ABSOLUTE) { return (ctx->last_rect = res); }
+    if (type == MU_ABSOLUTE) { return (ctx->last_rect = res); }
 
   } else {
     /* handle next row */

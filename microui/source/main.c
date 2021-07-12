@@ -30,11 +30,16 @@ static  char logbuf[64000];
 gs_handle(gs_graphics_texture_t)  atlas_tex = {0};
 static char * str = "";
 static float bg[3] = { 90, 95, 100 };
-//static int text_width(mu_Font font, const char *text, int len) {
-//    if (len == -1) { len = strlen(text); }
-//    return strlen(text) *8;
-//}
 
+void mu_char_callback(uint32_t handle, char codepoint)
+{
+    uint8_t txt[2] ={codepoint ,0};
+    gs_printf("codepoint %c %i\n",codepoint,codepoint);
+    if(codepoint>31&& codepoint<127){
+        printf("reached \n");
+        mu_input_text(&mu, txt);
+    }
+}
 static int text_width(mu_Font font, const char *text, int len) {
     int res = 0;
     for (const char* p = text; *p && len--; p++) {
@@ -50,12 +55,14 @@ static int text_height(mu_Font font) {
     return 18;
 }
 
-static void write_log(const char *text) {
-    if (logbuf[0]) { strcat(logbuf, "\n"); }
+static void write_log(const char* text) {
+    /* FIXME: THIS IS UNSAFE! */
+    if (logbuf[0]) {
+        strcat(logbuf, "\n");
+    }
     strcat(logbuf, text);
     logbuf_updated = 1;
 }
-
 static void log_window(mu_Context *ctx) {
     if (mu_begin_window(ctx, "Log Window", mu_rect(350, 40, 300, 200))) {
         /* output text panel */
@@ -214,7 +221,8 @@ void init()
                 .format = GS_GRAPHICS_TEXTURE_FORMAT_RGBA8,
                 .data = rgba8_pixels
             }
-            );
+    );
+    gs_platform_set_character_callback(0,mu_char_callback);
 }
 
 
@@ -225,84 +233,98 @@ void update()
     gs_vec2 mouse_pos = gs_platform_mouse_positionv();
     gsi_texture(&gsi,atlas_tex);
     gsi_camera2D(&gsi);
-    mu_begin(&mu);
-    test_window(&mu);
-    log_window(&mu);
-    mu_end(&mu);
-    {
         // Poll all events that occured this frame
         gs_platform_event_t evt = gs_default_val();
-        while(gs_platform_poll_events(&evt, false))
+        while (gs_platform_poll_events(&evt, false))
         {
-            switch(evt.type)
+            switch (evt.type)
             {
-                case GS_PLATFORM_EVENT_KEY:
-                {
-                    switch (evt.key.action)
-                    {
-                        case GS_PLATFORM_KEY_DOWN:
-                        {
-                            mu_input_keydown(&mu,evt.key.codepoint);
-                        } break;
-                        case GS_PLATFORM_KEY_PRESSED:
-                        {
-//                            gs_printf("%c %c \n",evt.key.codepoint,evt.key.keycode);
-                            char txt[2] = { (char)(evt.key.codepoint ), 0 };
-                            mu_input_text(&mu, txt);
-//                            str[0] = evt.key.codepoint;
-//                            mu_input_text(&mu,str);
-                        } break;
-                        case GS_PLATFORM_KEY_RELEASED:
-                        {
-                            mu_input_keyup(&mu,evt.key.codepoint);
-                        } break;
-                        default: break;
-                    }
-                } break;
-
                 case GS_PLATFORM_EVENT_MOUSE:
                 {
                     switch (evt.mouse.action)
                     {
-                        case GS_PLATFORM_MOUSE_BUTTON_DOWN:
-                        {
-                            int code = 1<<evt.mouse.button;
-                            gs_printf(" code %i shifted code %i\n",evt.mouse.button,code);
-                            mu_input_mousedown(&mu,(int)mouse_pos.x,(int)mouse_pos.y,code);
-                        } break;
-                        case GS_PLATFORM_MOUSE_BUTTON_PRESSED:
-                        {
-                            int code = 1<<evt.mouse.button;
-                            gs_printf(" code %i shifted code %i\n",evt.mouse.button,code);
-                            mu_input_mousedown(&mu,(int)mouse_pos.x,(int)mouse_pos.y,code);
-                        } break;
-                        case GS_PLATFORM_MOUSE_WHEEL:
-                        {
-
-                            mu_input_scroll(&mu, 0, (int)evt.mouse.wheel.y);
-
-                        } break;
-
                         case GS_PLATFORM_MOUSE_MOVE:
                         {
                             mu_input_mousemove(&mu,(int)evt.mouse.move.x,(int)evt.mouse.move.y);
-                        }
+                        } break;
+
+                        case GS_PLATFORM_MOUSE_WHEEL:
+                        {
+                            mu_input_scroll(&mu, 0, (int)evt.mouse.wheel.y* -30);
+                        } break;
+
+                        case GS_PLATFORM_MOUSE_BUTTON_PRESSED:
+                        {
+                            int code = 1<<evt.mouse.button;
+                            gs_printf(" pressed %i shifted code %i\n",evt.mouse.button,code);
+                            mu_input_mousedown(&mu,(int) mouse_pos.x,(int) mouse_pos.y,code);
                         } break;
 
                         case GS_PLATFORM_MOUSE_BUTTON_RELEASED:
                         {
                             int code = 1<<evt.mouse.button;
-                            gs_printf(" code %i shifted code %i\n",evt.mouse.button,code);
+                            gs_printf(" released %i shifted code %i\n",evt.mouse.button,code);
                             mu_input_mouseup(&mu,(int) mouse_pos.x,(int) mouse_pos.y,code);
                         } break;
 
-                        default: break;
+                        case GS_PLATFORM_MOUSE_BUTTON_DOWN:
+                        {
+                            int code = 1<<evt.mouse.button;
+                            gs_printf(" down %i shifted code %i\n",evt.mouse.button,code);
+                            mu_input_mousedown(&mu,(int) mouse_pos.x,(int) mouse_pos.y,code);
+                        } break;
+
+                        case GS_PLATFORM_MOUSE_ENTER:
+                        {
+                            // If there are user callbacks, could trigger them here
+                        } break;
+
+                        case GS_PLATFORM_MOUSE_LEAVE:
+                        {
+                            // If there are user callbacks, could trigger them here
+                        } break;
                     }
+
                 } break;
 
+                case GS_PLATFORM_EVENT_KEY:
+                {
+                    switch (evt.key.action)
+                    {
+//                        uint8_t txt[2] ={( char)evt.key.codepoint,0};
+//                        txt[0] = ( char)evt.key.codepoint+32;
+//                        mu_input_text(&mu, txt);
+                        case GS_PLATFORM_KEY_PRESSED:
+                        case GS_PLATFORM_KEY_DOWN:
+                        {
+                            mu_input_keydown(&mu,evt.key.codepoint);
+                        } break;
+
+                        case GS_PLATFORM_KEY_RELEASED:
+                        {
+                            mu_input_keyup(&mu,evt.key.codepoint);
+                        } break;
+                    }
+
+                } break;
+
+                case GS_PLATFORM_EVENT_WINDOW:
+                {
+                    switch (evt.window.action)
+                    {
+                        default: break;
+                    }
+
+                } break;
+
+
+                default: break;
             }
         }
-
+    mu_begin(&mu);
+    test_window(&mu);
+    log_window(&mu);
+    mu_end(&mu);
     mu_Command *cmd = NULL;
     while (mu_next_command(&mu, &cmd)) {
       switch (cmd->type) {
@@ -325,7 +347,7 @@ void update()
             break;
       }
     }
-    gsi_render_pass_submit(&gsi, &gcb, gs_color(10, 10, 10, 255));
+    gsi_render_pass_submit(&gsi, &gcb, gs_color(bg[0],bg[1],bg[2], 255.f));
     gs_graphics_submit_command_buffer(&gcb);
 }
 
@@ -335,6 +357,7 @@ gs_app_desc_t gs_main(int32_t argc, char** argv)
         .init = init,
         .update = update,
         .window_width = 1024,
-        .window_height = 760
+        .window_height = 760,
+        .frame_rate = 100000
     };
 }
