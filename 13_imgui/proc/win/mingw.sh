@@ -8,7 +8,7 @@ proj_name=App
 proj_root_dir=$(pwd)/../
 
 flags=(
-    -std=c++11 -x -O0 -w 
+    -std=c++11 -x -O0 -w -fpermissive
 )
 
 # Include directories
@@ -24,10 +24,10 @@ src=(
 
 libs=(
     -lopengl32
-    -lkernel32 
-    -luser32 
-    -lshell32 
-    -lgdi32 
+    -lkernel32
+    -luser32
+    -lshell32
+    -lgdi32
     -lAdvapi32
 )
 
